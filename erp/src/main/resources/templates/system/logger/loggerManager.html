@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css">
+    <script src="/resources/layui/layui.js"></script>
+    <link rel="stylesheet" href="/resources/layui/layui-ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/resources/layui/layui-ext/dtree/font/dtreefont.css">
+</head>
+<body style="margin: 10px">
+
+<!--查询条件开始-->
+<form action="" class="layui-form" id="searchFrm" lay-filter="searchFrm">
+    <div class="layui-form-item" style="width: 95%" align="center">
+        <div class="layui-inline">
+            <label class="layui-form-label">登录名称</label>
+            <div class="layui-input-inline">
+                <input type="text" name="loginname" autocomplete="off"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">开始时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="startTime" id="startTime" autocomplete="off"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">结束时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="endTime" id="endTime" autocomplete="off"  class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item" style="text-align: center;">
+        <div class="layui-input-block">
+            <button type="button" class="layui-btn" lay-submit="" lay-filter="doSearch">查询</button>
+            <button type="reset" class="layui-btn layui-btn-primary">清空</button>
+        </div>
+    </div>
+</form>
+<!--查询条件结束-->
+
+<!--数据表格开始-->
+<table class="layui-hide" id="loggerTable" lay-filter="loggerTable" style="text-align: center"></table>
+<div id="cellToolbar" style="display: none">
+    <button type="button" class="layui-btn layui-btn-danger layui-btn-sm" lay-event="delete">删除</button>
+</div>
+<!--数据表格结束-->
+
+</body>
+<script>
+    var tableIns;
+    layui.extend({
+        dtree: '../resources/layui/layui-ext/dtree/dtree'
+    }).use([ 'form', 'jquery', 'layer', 'table','laydate','layedit'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem:"#startTime"
+        })
+        laydate.render({
+            elem:"#endTime"
+        })
+
+        tableIns = table.render({
+            elem: '#loggerTable'   //渲染的目标对象
+            , url: '/logger/loadAllLogger' //数据接口
+            , height: 700
+            , page: true//设置开启分页
+            , cols: [ [
+                 {field: 'id',  title: '日志id', align: 'center'}
+                , {field: 'loginname', title: '登录名称', align: 'center'}
+                , {field: 'loginip',  title: '登录ip', align: 'center'}
+                , {field: 'logintime', title: '登录时间', sort: true, align: 'center'}
+                , { title: '操作', sort: true, align: 'center', fixed: 'right', toolbar: '#cellToolbar'}
+            ] ]
+        });
+        //监控查询事件
+        form.on('submit(doSearch)', function (data) {
+            var params = $("#searchFrm").serialize();
+            console.log(params);
+            tableIns.reload({
+                url: '/logger/loadAllLogger?' + params
+            })
+            return false;
+        })
+
+
+        //监听表体事件
+        table.on('tool(loggerTable)', function (obj) {
+            switch (obj.event) {
+                case 'delete':
+                    //删除
+                    openDeleteLogger(obj.data);
+                    break;
+            }
+            ;
+        });
+
+        //删除公告
+        function openDeleteLogger(data) {
+            layer.confirm('你确认要删除该日志吗？',{id:data.id},function (num) {
+                $.post("/logger/deleteLogger",{id:data.id},function (obj) {
+                    layer.msg(obj.msg)
+                    if(obj.code==200){
+                        //刷新数据表格
+                        tableIns.reload();
+                        //关闭弹出层
+                        layer.close(num);
+                    }
+                })
+            })
+        }
+
+    });
+
+
+
+</script>
+</html>

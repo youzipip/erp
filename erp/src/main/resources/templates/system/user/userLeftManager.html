@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>部门管理左边的树</title>
+    <link href="/resources/layui/css/layui.css" rel="stylesheet"
+          type="text/css">
+    <link href="/resources/layui/layui-ext/dtree/dtree.css"
+          rel="stylesheet" type="text/css">
+    <link rel="stylesheet"
+          href="/resources/layui/layui-ext/dtree/font/dtreefont.css">
+</head>
+<body style="margin: 10px">
+<ul id="deptTree" class="dtree" data-id="0"></ul>
+</body>
+<script type="text/javascript" src="../resources/layui/layui.js"></script>
+<script type="text/javascript">
+    var deptTree;
+    layui.extend({
+        dtree : '/resources/layui/layui-ext/dtree/dtree' // {/}的意思即代表采用自有路径，即不跟随 base 路径
+    }).use([ 'dtree', 'layer', 'jquery' ], function() {
+        var dtree = layui.dtree, layer = layui.layer, $ = layui.jquery;
+        deptTree = dtree.render({
+            elem : "#deptTree",
+            url : "/dept/loadDeptManagerLeftTreeJson",
+            dataStyle : "layuiStyle", //使用layui风格的数据格式
+            method:'get',
+            dataFormat : "list", //配置data的风格为list
+            response : {
+                message : "msg",
+                statusCode : 0
+            }
+        });
+
+        dtree.on("node('deptTree')", function(obj) {
+            var deptid=obj.param.nodeId;
+            window.parent.main.reloadTable(deptid);
+        });
+    });
+</script>
+</html>

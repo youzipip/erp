@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css">
+    <script src="/resources/layui/layui.js"></script>
+    <link rel="stylesheet" href="/resources/layui/layui-ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/resources/layui/layui-ext/dtree/font/dtreefont.css">
+</head>
+<body style="margin: 10px">
+
+<!--查询条件开始-->
+<form action="" class="layui-form" id="searchFrm" lay-filter="searchFrm">
+    <div class="layui-form-item" style="width: 95%">
+        <div class="layui-inline">
+            <label class="layui-form-label">公告标题</label>
+            <div class="layui-input-inline">
+                <input type="text" name="title" autocomplete="off"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">开始时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="startTime" id="startTime" autocomplete="off"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">结束时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="endTime" id="endTime" autocomplete="off"  class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item" style="text-align: center;">
+        <div class="layui-input-block">
+            <button type="button" class="layui-btn" lay-submit="" lay-filter="doSearch">查询</button>
+            <button type="reset" class="layui-btn layui-btn-primary">清空</button>
+            <button type="button" class="layui-btn" lay-submit="" lay-filter="loadSearch">添加</button>
+        </div>
+    </div>
+</form>
+<!--查询条件结束-->
+
+<!--数据表格开始-->
+<table class="layui-hide" id="noticeTable" lay-filter="noticeTable" style="text-align: center"></table>
+<div id="cellToolbar" style="display: none">
+    <button type="button" class="layui-btn layui-btn-sm" lay-event="update">编辑</button>
+    <button type="button" class="layui-btn layui-btn-danger layui-btn-sm" lay-event="delete">删除</button>
+    <button type="button" class="layui-btn layui-btn-sm" lay-event="load">查看</button>
+</div>
+<!--数据表格结束-->
+
+<!--添加修改数据表格开始-->
+<div id="addOrUpdateNotice" style="display: none;padding: 10px">
+    <form action="" class="layui-form" id="dataFrm" lay-filter="dataFrm">
+            <div class="layui-form-item">
+                <label class="layui-form-label">公告标题</label>
+                <div class="layui-input-block">
+                    <input type="hidden" name="id">
+                    <input type="text" name="title" id="title" lay-verify="title" autocomplete="off" placeholder="公告标题" class="layui-input">
+                </div>
+            </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">公告内容</label>
+            <div class="layui-input-block">
+                <textarea name="content" id="content" lay-verify="content" autocomplete="off" class="layui-input"></textarea>
+            </div>
+        </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="doSubmit">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+    </form>
+</div>
+<!--添加修改数据表格结束-->
+</body>
+<script>
+    var tableIns;
+    layui.extend({
+        dtree: '../resources/layui/layui-ext/dtree/dtree'
+    }).use(['dtree', 'form', 'jquery', 'layer', 'table','laydate','layedit'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var dtree = layui.dtree;
+        var laydate = layui.laydate;
+        var layedit = layui.layedit;
+        //建立富文本编辑器
+        layedit.build("content")
+        
+        laydate.render({
+            elem:"#startTime"
+        })
+        laydate.render({
+            elem:"#endTime"
+        })
+
+        tableIns = table.render({
+            elem: '#noticeTable'   //渲染的目标对象
+            , url: '/notice/loadAllNotice' //数据接口
+            , height: 700
+            , page: true//设置开启分页
+            , cols: [ [
+                 {field: 'id',  title: '公告id', align: 'center'}
+                , {field: 'title', title: '公告标题', align: 'center'}
+                , {field: 'createtime',  title: '发布时间', align: 'center'}
+                , {field: 'opername', title: '发布人', sort: true, align: 'center'}
+                , { title: '操作', sort: true, align: 'center', fixed: 'right', toolbar: '#cellToolbar'}
+            ] ]
+        });
+        //监控查询事件
+        form.on('submit(doSearch)', function (data) {
+            var params = $("#searchFrm").serialize();
+            console.log(params);
+            tableIns.reload({
+                url: '/notice/loadAllNotice?' + params
+            })
+            return false;
+        })
+
+        //监控添加按钮
+        form.on('submit(loadSearch)',function (data) {
+            openAddNotice();
+        })
+
+        //监听表体事件
+        table.on('tool(noticeTable)', function (obj) {
+            switch (obj.event) {
+                case 'update':
+                    //修改页面
+                    openUpdateNotice(obj.data);
+                    break;
+                case 'delete':
+                    //删除
+                    openDeleteNotice(obj.data);
+                    break;
+                case 'load':
+                    openLoadNotice(obj.data);
+                    break;
+            }
+            ;
+        });
+        var index;
+        var url;
+        //打开添加页面
+        function openAddNotice() {
+            index = layer.open({
+                type: 1,
+                title: '添加公告',
+                area: ["800px", "650px"],
+                maxmin: true,
+                content: $("#addOrUpdateNotice"),
+                success: function (layero, index) {
+                    //清空表单数据
+                    $("#dataFrm")[0].reset();
+                    url = '/notice/addNotice';
+                }
+            })
+        }
+
+        //打开修改页面
+        function openUpdateNotice(data) {
+            index = layer.open({
+                type: 1,
+                title: '修改公告',
+                area: ["800px", "650px"],
+                maxmin: true,
+                content: $("#addOrUpdateNotice"),
+                success: function (layero, index) {
+                    //清空表单数据
+                    $("#dataFrm")[0].reset();
+                    //装载数据
+                    form.val("dataFrm", data);
+                    url = '/notice/updateNotice';
+                }
+            })
+        }
+        //打开查看页面
+        function openLoadNotice(data) {
+           layer.msg(data.content)
+        }
+
+        //删除公告
+        function openDeleteNotice(data) {
+            layer.confirm('你确认要删除【'+data.title+'】吗？',{id:data.id},function (num) {
+                $.post("/notice/deleteNotice",{id:data.id},function (obj) {
+                    layer.msg(obj.msg)
+                    if(obj.code==200){
+                        //刷新数据表格
+                        tableIns.reload();
+                        //关闭弹出层
+                        layer.close(num);
+                    }
+                })
+            })
+        }
+
+        //监听添加修改的保存事件
+        form.on('submit(doSubmit)', function (data) {
+            var params = $("#dataFrm").serialize();
+            $.post(url + "?" + params, function (obj) {
+                layer.msg(obj.msg);
+                if (obj.code == 200) {
+                    //关闭弹出层
+                    layer.close(index);
+                    //刷新数据表格
+                    tableIns.reload();
+                }
+            })
+            return false;
+        });
+
+    });
+
+
+
+</script>
+</html>

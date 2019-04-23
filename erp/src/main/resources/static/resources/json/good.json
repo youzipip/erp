@@ -1,0 +1,10 @@
+{
+  "code": 0,
+  "msg": "操作成功",
+  "data": [
+    {"id":"001","title": "所有供应商","checkArr": "0","parentId": "0","spread":true},
+    {"id":"001001","title": "旺旺食品","checkArr": "0","parentId": "001"},
+    {"id":"001002","title": "达利园食品","checkArr": "0","parentId": "001"},
+    {"id":"001003","title": "哇哈哈集团","checkArr": "0","parentId": "001"}
+  ]
+}

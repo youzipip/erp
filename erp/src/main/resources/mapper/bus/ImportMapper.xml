@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sxt.bus.mapper.ImportMapper" >
+  <resultMap id="BaseResultMap" type="com.sxt.bus.domain.Import" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="paytype" property="paytype" jdbcType="VARCHAR" />
+    <result column="inporttime" property="inporttime" jdbcType="TIMESTAMP" />
+    <result column="operateperson" property="operateperson" jdbcType="VARCHAR" />
+    <result column="number" property="number" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="inportprice" property="inportprice" jdbcType="DOUBLE" />
+    <result column="providerid" property="providerid" jdbcType="INTEGER" />
+    <result column="goodsid" property="goodsid" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, paytype, inporttime, operateperson, number, remark, inportprice, providerid, 
+    goodsid
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from bus_import
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from bus_import
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.sxt.bus.domain.Import" >
+    insert into bus_import (id, paytype, inporttime, 
+      operateperson, number, remark, 
+      inportprice, providerid, goodsid
+      )
+    values (#{id,jdbcType=INTEGER}, #{paytype,jdbcType=VARCHAR}, #{inporttime,jdbcType=TIMESTAMP}, 
+      #{operateperson,jdbcType=VARCHAR}, #{number,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, 
+      #{inportprice,jdbcType=DOUBLE}, #{providerid,jdbcType=INTEGER}, #{goodsid,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.sxt.bus.domain.Import" >
+    insert into bus_import
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="paytype != null" >
+        paytype,
+      </if>
+      <if test="inporttime != null" >
+        inporttime,
+      </if>
+      <if test="operateperson != null" >
+        operateperson,
+      </if>
+      <if test="number != null" >
+        number,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="inportprice != null" >
+        inportprice,
+      </if>
+      <if test="providerid != null" >
+        providerid,
+      </if>
+      <if test="goodsid != null" >
+        goodsid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="paytype != null" >
+        #{paytype,jdbcType=VARCHAR},
+      </if>
+      <if test="inporttime != null" >
+        #{inporttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operateperson != null" >
+        #{operateperson,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        #{number,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="inportprice != null" >
+        #{inportprice,jdbcType=DOUBLE},
+      </if>
+      <if test="providerid != null" >
+        #{providerid,jdbcType=INTEGER},
+      </if>
+      <if test="goodsid != null" >
+        #{goodsid,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.sxt.bus.domain.Import" >
+    update bus_import
+    <set >
+      <if test="paytype != null" >
+        paytype = #{paytype,jdbcType=VARCHAR},
+      </if>
+      <if test="inporttime != null" >
+        inporttime = #{inporttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operateperson != null" >
+        operateperson = #{operateperson,jdbcType=VARCHAR},
+      </if>
+      <if test="number != null" >
+        number = #{number,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="inportprice != null" >
+        inportprice = #{inportprice,jdbcType=DOUBLE},
+      </if>
+      <if test="providerid != null" >
+        providerid = #{providerid,jdbcType=INTEGER},
+      </if>
+      <if test="goodsid != null" >
+        goodsid = #{goodsid,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.sxt.bus.domain.Import" >
+    update bus_import
+    set paytype = #{paytype,jdbcType=VARCHAR},
+      inporttime = #{inporttime,jdbcType=TIMESTAMP},
+      operateperson = #{operateperson,jdbcType=VARCHAR},
+      number = #{number,jdbcType=INTEGER},
+      remark = #{remark,jdbcType=VARCHAR},
+      inportprice = #{inportprice,jdbcType=DOUBLE},
+      providerid = #{providerid,jdbcType=INTEGER},
+      goodsid = #{goodsid,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <resultMap id="MyResultMap" type="com.sxt.bus.domain.Import" extends="BaseResultMap" >
+    <result column="providername" property="providername" jdbcType="INTEGER" />
+    <result column="goodsname" property="goodsname" jdbcType="INTEGER" />
+    <result column="size" property="size" jdbcType="INTEGER" />
+  </resultMap>
+  <select id="queryAllImport" resultMap="MyResultMap">
+    select t1.*,t2.providername,t3.goodsname,size from bus_import t1 inner join bus_provider t2
+    inner join bus_goods t3 on(t1.goodsid=t3.id and t3.providerid=t2.id)
+    <where>
+     <if test="goodsname!=null and goodsname!=''">
+       and goodsname like "%"#{goodsname}"%"
+     </if>
+     <if test="providername!=null and providername!=''">
+       and providername like "%"#{providername}"%"
+     </if>
+     <if test="startTime!=null">
+       and inporttime >= #{startTime}
+     </if>
+     <if test="endTime!=null">
+       and inporttime <![CDATA[<=]]> #{endTime}
+     </if>
+    </where>
+    order by t1.id
+  </select>
+</mapper>

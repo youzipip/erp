@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css">
+    <script src="/resources/layui/layui.js"></script>
+    <link rel="stylesheet" href="/resources/layui/layui-ext/dtree/dtree.css">
+    <link rel="stylesheet" href="/resources/layui/layui-ext/dtree/font/dtreefont.css">
+</head>
+<body style="margin: 10px">
+
+<!--查询条件开始-->
+<form method="post" class="layui-form" id="searchFrm" lay-filter="searchFrm">
+    <div class="layui-form-item" style="width: 95%" align="center">
+        <div class="layui-inline">
+            <label class="layui-form-label">供应商:</label>
+            <div class="layui-input-inline">
+                <select name="providername" id="provider">
+                    <option value="">请选择供应商</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">商品名称:</label>
+            <div class="layui-input-inline">
+                <input type="text" name="importname" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">开始时间:</label>
+            <div class="layui-input-inline">
+                <input type="text" name="startTime" id="startTime" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">结束时间:</label>
+            <div class="layui-input-inline">
+                <input type="text" name="endTime" id="endTime" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item" style="text-align: center;">
+        <button type="button" class="layui-btn" lay-submit="" lay-filter="doSearch">查询</button>
+        <button type="reset" class="layui-btn layui-btn-warm">清空</button>
+    </div>
+</form>
+<!--查询条件结束-->
+
+<!--数据表格开始-->
+<table class="layui-hide" id="importTable" lay-filter="importTable" style="text-align: center"></table>
+<div id="tableToolbar" style="display: none">
+    <button type="button" class="layui-btn" lay-event="add">添加</button>
+</div>
+<div id="cellToolbar" style="display: none">
+    <button type="button" class="layui-btn layui-btn-sm" lay-event="update">修改</button>
+    <button type="button" class="layui-btn layui-btn-danger layui-btn-sm" lay-event="delete">删除</button>
+</div>
+<!--数据表格结束-->
+
+<!--添加修改数据表格开始-->
+<div id="addOrUpdateImport" style="display: none;padding: 10px">
+    <form action="" class="layui-form" id="dataFrm" lay-filter="dataFrm">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">供应商:</label>
+                <div class="layui-input-inline">
+                    <input type="hidden" name="id">
+                    <select name="providerid" id="providername" lay-filter="providername">
+                        <option value="" lay-verify="required">请选择供应商</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">商品名称</label>
+                <div class="layui-input-inline">
+                    <select name="goodsid" id="goodsname">
+                        <option value="" lay-verify="required">请选择商品名称</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" >进货数量:</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="number" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label" >进货价格:</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="inportprice" lay-verify="required"  autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label" >支持类型:</label>
+            <div class="layui-input-block">
+                <input type="radio" name="paytype"  value="微信" title="微信" checked="">
+                <input type="radio" name="paytype"  value="支付宝" title="支付宝">
+                <input type="radio" name="paytype"  value="银联" title="银联">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">进货备注:</label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入进货备注" name="remark" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item" align="center">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="doSubmit">提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<!--添加修改数据表格结束-->
+
+</body>
+<script>
+    var tableIns;
+    layui.extend({
+        dtree: '../resources/layui/layui-ext/dtree/dtree'
+    }).use(['dtree', 'form', 'jquery', 'layer', 'table','laydate'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var dtree = layui.dtree;
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem:"#startTime"
+        })
+        laydate.render({
+            elem:"#endtTime"
+        })
+
+        tableIns = table.render({
+            elem: '#importTable'   //渲染的目标对象
+            , url: '/import/loadAllImport' //数据接口
+            , height: 700
+            , toolbar: "#tableToolbar"
+            , page: true//设置开启分页
+            , cols: [ [
+                {field: 'id', title: '进货ID', minWidth:80, align:"center"},
+                {field: 'goodsname', title: '商品名称',width:150, minWidth:100, align:"center"},
+                {field: 'providername', title: '供应商名称', minWidth:100,width:120, align:"center"},
+                {field: 'inportprice', title: '进货价格',width:100, minWidth:100, align:"center"},
+                {field: 'size', title: '商品规格',width:100,  align:'center'},
+                {field: 'inporttime', title: '进货时间',width:150, minWidth:100, align:"center"},
+                {field: 'number', title: '进货数量',width:100, minWidth:100, align:"center"},
+                {field: 'paytype', title: '支付类型',width:100, minWidth:100, align:"center"},
+                {field: 'operateperson', title: '操作员',width:100, minWidth:100, align:"center"},
+                {field: 'remark', title: '备注',width:120, minWidth:100, align:"center"},
+                {field:'available', width:100, title: '是否可用',align:'center',templet:function(data){
+                        return data.available==1?'<font color=blue>不可用</font>':'<font color=red>可用</font>';
+                    }},
+                {title: '操作', minWidth:185, templet:'#cellToolbar',fixed:"right",align:"center"}
+            ] ]
+        });
+        //查询监控事件
+        form.on('submit(doSearch)', function (data) {
+            var params = $("#searchFrm").serialize();
+            tableIns.reload({
+                url: '/import/loadAllImport?' + params + "&page=1"
+            })
+            return false;
+        })
+
+        //初始化下拉框
+        function initProviderSelect(elem){
+            $.get("/goods/loadProviderNameJson",function (obj) {
+                var providerName_html = "<option value=''>请选择供应商</option>"
+                for(var i=0;i<obj.length;i++){
+                    providerName_html+="<option value="+obj[i].id+">"+obj[i].providername+"</option>"
+                }
+                elem.html(providerName_html)
+                form.render('select')
+            })
+        }
+
+        initProviderSelect($("#providername"));
+        initProviderSelect($("#provider"));
+        initGoodsName();
+
+        //监听表头事件
+        table.on('toolbar(importTable)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id)
+            switch (obj.event) {
+                case 'add':
+                    //添加页面
+                    openAddImport();
+                    break;
+            }
+        })
+        //监听商品名称下拉框
+        function initGoodsName(){
+            form.on('select(providername)', function(data){
+                $.ajax({
+                    url:"/goods/loadGoodsByProviderId?id="+data.value,
+                    method:"post",
+                    success:function (obj) {
+                        var elem=$("#goodsname")
+                        var goodsName_html = "<option value=''>请选择商品名称</option>"
+                        for(var i=0;i<obj.length;i++){
+                            goodsName_html+="<option value="+obj[i].id+">"+obj[i].goodsname+"</option>"
+                        }
+                        elem.html(goodsName_html)
+                        form.render('select')
+                        /*if(fn!=undefined){
+                            fn();
+                        }*/
+                    }
+                })
+            });
+        }
+
+        //监听表体事件
+        table.on('tool(importTable)', function (obj) {
+            switch (obj.event) {
+                case 'update':
+                    //修改页面
+                    openUpdateImport(obj.data);
+                    break;
+                case 'delete':
+                    openDeleteImport(obj.data);
+                    break;
+                case 'export':
+                    exportImport(obj.data);
+                    break;
+            }
+            ;
+        });
+
+
+        var index;
+        var url;
+        //打开添加页面
+        function openAddImport() {
+            index = layer.open({
+                type: 1,
+                title: '商品进货',
+                area: ["800px", "500px"],
+                maxmin: true,
+                content: $("#addOrUpdateImport"),
+                success: function (layero, index) {
+                    //清空表单数据
+                    $("#dataFrm")[0].reset();
+                    url = '/import/addImport';
+                }
+            })
+        }
+
+        //打开修改页面
+        function openUpdateImport(data) {
+            index = layer.open({
+                type: 1,
+                title: '修改商品',
+                area: ["800px", "500px"],
+                maxmin: true,
+                content: $("#addOrUpdateImport"),
+                success: function (layero, index) {
+                    //清空表单数据
+                    $("#dataFrm")[0].reset();
+                    //装载数据
+                    form.val("dataFrm", data);
+                    url = '/import/updateImport';
+                   // initGoodsName();
+                  /*  initGoodsName(function () {
+                        $("#goodsname").val(3)
+                        form.render("select")
+                    })*/
+                }
+            })
+        }
+
+        //删除商品
+        function openDeleteImport(data) {
+            layer.confirm('你确认要删除该进货商品吗？', {id: data.id}, function (num) {
+                $.post("/import/deleteImport", {id: data.id}, function (obj) {
+                    layer.msg(obj.msg)
+                    if (obj.code == 200) {
+                        //刷新数据表格
+                        tableIns.reload();
+                        //关闭弹出层
+                        layer.close(num);
+                    }
+                })
+            })
+        }
+        //监听添加修改的保存事件
+        form.on('submit(doSubmit)', function (data) {
+            var params = $("#dataFrm").serialize();
+            $.post(url + "?" + params, function (obj) {
+                if(obj.code>0){
+                    layer.msg(obj.msg);
+                    if (obj.code == 200) {
+                        //关闭弹出层
+                        layer.close(index);
+                        //刷新数据表格
+                        tableIns.reload();
+                    }
+                }else{
+                    layer.msg("商品库存不足")
+                }
+            })
+            return false;
+        });
+    });
+
+
+</script>
+</html>
